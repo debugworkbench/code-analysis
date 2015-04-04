@@ -1,0 +1,7 @@
+.baseDir.ts
+docs
+lib
+node_modules
+npm-debug.log
+test/*.js
+test/*.js.map
