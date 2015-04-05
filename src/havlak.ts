@@ -194,24 +194,24 @@ class UnionFindNode {
     }
 }
 
+enum BasicBlockType {
+  /** Uninitialized basic block */
+  TOP,
+  /** A regular basic block */
+  NONHEADER,
+  /** Reducible loop type */
+  REDUCIBLE,
+  /** Single basic block loop */
+  SELF,
+  /** Irreducible loop */
+  IRREDUCIBLE,
+  /** A dead basic block */
+  DEAD
+}
+
 export class HavlakLoopFinder {
     cfg: CFG.CFG;
     lsg: LSG;
-
-    /** Uninitialized basic block */
-    static BB_TOP: number = 0;
-    /** A regular basic block */
-    static BB_NONHEADER: number = 1;
-    /** Reducible loop type */
-    static BB_REDUCIBLE: number = 2;
-    /** Single basic block loop */
-    static BB_SELF: number = 3;
-    /** Irreducible loop */
-    static BB_IRREDUCIBLE: number = 4;
-    /** A dead basic block */
-    static BB_DEAD: number = 5;
-    /** The last basic block type */
-    static BB_LAST: number = 6;
 
     /** Marker for uninitialized nodes. */
     static UNVISITED: number = -1;
@@ -273,7 +273,7 @@ export class HavlakLoopFinder {
         let backPreds: Array<Array<number>> = new Array(size);
         let numbers: Array<number> = new Array(size);
         let header: Array<number> = new Array(size);
-        let types: Array<number> = new Array(size);
+        let types: Array<BasicBlockType> = new Array(size);
         let last: Array<number> = new Array(size);
         let nodes: Array<UnionFindNode> = new Array(size);
 
@@ -282,7 +282,7 @@ export class HavlakLoopFinder {
             backPreds[i] = [];
             numbers[i] = HavlakLoopFinder.UNVISITED;
             header[i] = 0;
-            types[i] = HavlakLoopFinder.BB_NONHEADER;
+            types[i] = BasicBlockType.NONHEADER;
             last[i] = 0;
             nodes[i] = new UnionFindNode();
         }
@@ -307,7 +307,7 @@ export class HavlakLoopFinder {
         for (let w: number = 0; w < size; ++w) {
             let nodeW: BasicBlock = nodes[w].bb;
             if (nodeW == null) {
-                types[w] = HavlakLoopFinder.BB_DEAD;
+                types[w] = BasicBlockType.DEAD;
             } else {
                 if (nodeW.getNumPred() > 0) {
                     for (let nv: number = 0; nv < nodeW.inEdges.length; ++nv) {
@@ -352,7 +352,7 @@ export class HavlakLoopFinder {
                 if (v !== w) {
                     nodePool.push(nodes[v].findSet());
                 } else {
-                    types[w] = HavlakLoopFinder.BB_SELF;
+                    types[w] = BasicBlockType.SELF;
                 }
             }
 
@@ -364,7 +364,7 @@ export class HavlakLoopFinder {
             }
 
             if (nodePool.length !== 0) {
-                types[w] = HavlakLoopFinder.BB_REDUCIBLE;
+                types[w] = BasicBlockType.REDUCIBLE;
             }
             // work the list...
             //
@@ -393,7 +393,7 @@ export class HavlakLoopFinder {
                     let ydash: UnionFindNode = y.findSet();
 
                     if (!this.isAncestor(w, ydash.dfsNumber, last)) {
-                        types[w] = HavlakLoopFinder.BB_IRREDUCIBLE;
+                        types[w] = BasicBlockType.IRREDUCIBLE;
                         nonBackPreds[w].push(ydash.dfsNumber);
                     } else {
                         if (ydash.dfsNumber !== w) {
@@ -409,11 +409,11 @@ export class HavlakLoopFinder {
             // Collapse/Unionize nodes in a SCC to a single node
             // For every SCC found, create a loop descriptor and link it in.
             //
-            if ((nodePool.length > 0) || (types[w] === HavlakLoopFinder.BB_SELF)) {
+            if ((nodePool.length > 0) || (types[w] === BasicBlockType.SELF)) {
                 let loop: SimpleLoop = this.lsg.createNewLoop();
 
                 loop.setHeader(nodeW);
-                if (types[w] === HavlakLoopFinder.BB_IRREDUCIBLE) {
+                if (types[w] === BasicBlockType.IRREDUCIBLE) {
                     loop.isReducible = true;
                 } else {
                     loop.isReducible = false;
