@@ -59,9 +59,9 @@ export class BasicBlockEdge {
     from: BasicBlock;
     to: BasicBlock;
 
-    constructor(cfg: CFG, fromName: number, toName: number) {
-        this.from = cfg.createNode(fromName);
-        this.to = cfg.createNode(toName);
+    constructor(cfg: CFG, from: BasicBlock, to: BasicBlock) {
+        this.from = from;
+        this.to = to;
 
         this.from.addOutEdge(this.to);
         this.to.addInEdge(this.from);
