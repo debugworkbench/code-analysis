@@ -85,21 +85,21 @@ export class SimpleLoop {
     }
 }
 
-//
-// LoopStructureGraph
-//
-// Maintain loop structure for a given CFG.
-//
-// Two values are maintained for this loop graph, depth, and nesting level.
-// For example:
-//
-// loop        nesting level    depth
-//----------------------------------------
-// loop-0      2                0
-//   loop-1    1                1
-//   loop-3    1                1
-//     loop-2  0                2
-//
+/**
+   Maintain loop structure for a given [[CFG]].
+
+   Two values are maintained for this loop graph, depth, and nesting level.
+   For example:
+
+   ```
+   loop        nesting level    depth
+  ----------------------------------------
+   loop-0      2                0
+     loop-1    1                1
+     loop-3    1                1
+       loop-2  0                2
+  ```
+*/
 export class LSG {
     loopCounter: number = 1;
     loops: Array<SimpleLoop> = [];
@@ -133,32 +133,31 @@ export class LSG {
 // Main Algorithm
 //======================================================
 
-//
-// class UnionFindNode
-//
-// The algorithm uses the Union/Find algorithm to collapse
-// complete loops into a single node. These nodes and the
-// corresponding functionality are implemented with this class
-//
+/**
+   The algorithm uses the Union/Find algorithm to collapse
+   complete loops into a single node. These nodes and the
+   corresponding functionality are implemented with this class
+*/
 class UnionFindNode {
     dfsNumber: number = 0;
     parent: UnionFindNode;
     bb: BasicBlock;
     loop: SimpleLoop;
 
-    /// Initialize this node.
+    /** Initialize this node. */
     initNode(bb: BasicBlock, dfsNumber: number): void {
         this.parent = this;
         this.bb = bb;
         this.dfsNumber = dfsNumber;
     }
 
-    // Union/Find Algorithm - The find routine.
-    //
-    // Implemented with Path Compression (inner loops are only
-    // visited and collapsed once, however, deep nests would still
-    // result in significant traversals).
-    //
+    /**
+       Union/Find Algorithm - The find routine.
+
+       Implemented with Path Compression (inner loops are only
+       visited and collapsed once, however, deep nests would still
+       result in significant traversals).
+    */
     findSet(): UnionFindNode {
         let nodeList: Array<UnionFindNode> = [];
 
@@ -179,11 +178,12 @@ class UnionFindNode {
         return node;
     }
 
-    // Union/Find Algorithm - The union routine.
-    //
-    // Trivial. Assigning parent pointer is enough,
-    // we rely on path compression.
-    //
+    /**
+      Union/Find Algorithm - The union routine.
+
+       Trivial. Assigning parent pointer is enough,
+       we rely on path compression.
+    */
     union(unionFindNode: UnionFindNode): void {
         this.parent = unionFindNode;
     }
@@ -198,18 +198,25 @@ export class HavlakLoopFinder {
     cfg: CFG.CFG;
     lsg: LSG;
 
-    static BB_TOP: number = 0; // uninitialized
-    static BB_NONHEADER: number = 1; // a regular BB
-    static BB_REDUCIBLE: number = 2; // reducible loop
-    static BB_SELF: number = 3; // single BB loop
-    static BB_IRREDUCIBLE: number = 4; // irreducible loop
-    static BB_DEAD: number = 5; // a dead BB
-    static BB_LAST: number = 6; // Sentinel
+    /** Uninitialized basic block */
+    static BB_TOP: number = 0;
+    /** A regular basic block */
+    static BB_NONHEADER: number = 1;
+    /** Reducible loop type */
+    static BB_REDUCIBLE: number = 2;
+    /** Single basic block loop */
+    static BB_SELF: number = 3;
+    /** Irreducible loop */
+    static BB_IRREDUCIBLE: number = 4;
+    /** A dead basic block */
+    static BB_DEAD: number = 5;
+    /** The last basic block type */
+    static BB_LAST: number = 6;
 
-    // Marker for uninitialized nodes.
+    /** Marker for uninitialized nodes. */
     static UNVISITED: number = -1;
 
-    // Safeguard against pathologic algorithm behavior.
+    /** Safeguard against pathologic algorithm behavior. */
     static MAXNONBACKPREDS: number = (32 * 1024);
 
     constructor(cfg: CFG.CFG, lsg: LSG) {
@@ -217,26 +224,19 @@ export class HavlakLoopFinder {
         this.lsg = lsg;
     }
 
-    //
-    // IsAncestor
-    //
-    // As described in the paper, determine whether a node 'w' is a
-    // "true" ancestor for node 'v'.
-    //
-    // Dominance can be tested quickly using a pre-order trick
-    // for depth-first spanning trees. This is why DFS is the first
-    // thing we run below.
-    //
+    /**
+       As described in the paper, determine whether a node 'w' is a
+       "true" ancestor for node 'v'.
+
+       Dominance can be tested quickly using a pre-order trick
+       for depth-first spanning trees. This is why DFS is the first
+       thing we run below.
+    */
     private isAncestor(w: number, v: number, last: Array<number>): boolean {
         return (w <= v) && (v <= last[w]);
     }
 
-    //
-    // DFS - Depth-First-Search
-    //
-    // DESCRIPTION:
-    // Simple depth first traversal along out edges with node numbering.
-    //
+    /** Simple depth first traversal along out edges with node numbering. */
     private DFS(currentNode: BasicBlock,
         nodes: Array<UnionFindNode>,
         numbers: Array<number>,
@@ -256,14 +256,12 @@ export class HavlakLoopFinder {
         return lastid;
     }
 
-    //
-    // findLoops
-    //
-    // Find loops and build loop forest using Havlak's algorithm, which
-    // is derived from Tarjan. Variable names and step numbering has
-    // been chosen to be identical to the nomenclature in Havlak's
-    // paper (which, in turn, is similar to the one used by Tarjan).
-    //
+    /**
+       Find loops and build loop forest using Havlak's algorithm, which
+       is derived from Tarjan. Variable names and step numbering has
+       been chosen to be identical to the nomenclature in Havlak's
+       paper (which, in turn, is similar to the one used by Tarjan).
+    */
     findLoops(): number {
         if (this.cfg.startNode == null) {
             return 0;
