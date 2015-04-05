@@ -81,7 +81,7 @@ module.exports = function(grunt) {
         build: {
             options: {
                 module: 'commonjs',
-                target: 'es5',
+                target: 'es6',
                 out: 'docs/',
                 name: '<%= pkg.name %>'
             },
