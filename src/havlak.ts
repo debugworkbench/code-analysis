@@ -77,9 +77,9 @@ export class SimpleLoop {
         result = mix(result, this.nestingLevel);
         result = mix(result, this.depthLevel);
         if (this.header != null) {
-            result = mix(result, this.header.name);
+            result = mix(result, this.header.id);
         }
-        this.basicBlocks.forEach((e) => result = mix(result, e.name));
+        this.basicBlocks.forEach((e) => result = mix(result, e.id));
         this.children.forEach((e) => result = mix(result, e.checksum()));
         return result;
     }
@@ -242,17 +242,17 @@ export class HavlakLoopFinder {
         numbers: Array<number>,
         last: Array<number>, current: number): number {
         nodes[current].initNode(currentNode, current);
-        numbers[currentNode.name] = current;
+        numbers[currentNode.id] = current;
 
         let lastid: number = current;
         for (let target: number = 0; target < currentNode.outEdges.length; target++) {
-            if (numbers[currentNode.outEdges[target].name] === HavlakLoopFinder.UNVISITED) {
+            if (numbers[currentNode.outEdges[target].id] === HavlakLoopFinder.UNVISITED) {
                 lastid = this.DFS(currentNode.outEdges[target], nodes, numbers,
                     last, lastid + 1);
             }
         }
 
-        last[numbers[currentNode.name]] = lastid;
+        last[numbers[currentNode.id]] = lastid;
         return lastid;
     }
 
@@ -312,7 +312,7 @@ export class HavlakLoopFinder {
                 if (nodeW.getNumPred() > 0) {
                     for (let nv: number = 0; nv < nodeW.inEdges.length; ++nv) {
                         let nodeV: BasicBlock = nodeW.inEdges[nv];
-                        let v: number = numbers[nodeV.name];
+                        let v: number = numbers[nodeV.id];
                         if (v !== HavlakLoopFinder.UNVISITED) {
                             if (this.isAncestor(w, v, last)) {
                                 backPreds[w].push(v);

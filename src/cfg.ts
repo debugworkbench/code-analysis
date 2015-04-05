@@ -18,12 +18,12 @@
   a vector of out-edges.
 */
 export class BasicBlock {
-    name: number;
+    id: number;
     inEdges: Array<BasicBlock> = [];
     outEdges: Array<BasicBlock> = [];
 
-    constructor(name: number) {
-        this.name = name;
+    constructor(id: number) {
+        this.id = id;
         BasicBlock.numBasicBlocks++;
     }
 
@@ -79,11 +79,11 @@ export class CFG {
     edgeList: Array<BasicBlockEdge> = [];
     startNode: BasicBlock;
 
-    createNode(name: number): BasicBlock {
-        var node = this.basicBlockMap.get(name);
+    createNode(id: number): BasicBlock {
+        var node = this.basicBlockMap.get(id);
         if (node == null) {
-            node = new BasicBlock(name);
-            this.basicBlockMap.set(name, node);
+            node = new BasicBlock(id);
+            this.basicBlockMap.set(id, node);
         }
 
         if (this.getNumNodes() === 1) {
