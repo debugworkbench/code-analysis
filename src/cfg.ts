@@ -32,10 +32,6 @@ export class BasicBlock {
         return BasicBlock.numBasicBlocks;
     }
 
-    toString(): string {
-        return `BB$name`;
-    }
-
     getNumPred(): number {
         return this.inEdges.length;
     }
