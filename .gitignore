@@ -1,4 +1,5 @@
 .baseDir.ts
+.tscache
 docs
 lib
 node_modules
