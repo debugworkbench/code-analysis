@@ -15,6 +15,7 @@
     ],
     "files": [
         "./cfg.ts",
-        "./havlak.ts"
+        "./havlak.ts",
+        "./index.ts"
     ]
 }
